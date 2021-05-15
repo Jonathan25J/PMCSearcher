@@ -1,0 +1,10 @@
+name: PMCSearcher
+author: jonaqhan
+main: me.jonaqhan.pmcsearcher.Main
+version: 1.0
+description: search through PlanetMinecraft profiles
+api-version: 1.16
+
+commands:
+  pmu:
+    description: /pmu <user> get userstats from a PMC user
