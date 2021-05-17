@@ -207,7 +207,6 @@ public class DatapackSearcher implements CommandExecutor {
 		try {
 			profileField = skullMeta.getClass().getDeclaredField("profile");
 		} catch (NoSuchFieldException | SecurityException e) {
-			e.printStackTrace();
 		}
 
 		profileField.setAccessible(true);
@@ -215,7 +214,6 @@ public class DatapackSearcher implements CommandExecutor {
 		try {
 			profileField.set(skullMeta, profile);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
 		}
 
 		return skullMeta;
@@ -237,7 +235,6 @@ public class DatapackSearcher implements CommandExecutor {
 		try {
 			profileForwardField = metaForward.getClass().getDeclaredField("profile");
 		} catch (NoSuchFieldException | SecurityException e) {
-			e.printStackTrace();
 		}
 
 		profileForwardField.setAccessible(true);
@@ -245,7 +242,6 @@ public class DatapackSearcher implements CommandExecutor {
 		try {
 			profileForwardField.set(metaForward, profileForward);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
 		}
 
 		forward.setItemMeta(metaForward);
@@ -263,7 +259,6 @@ public class DatapackSearcher implements CommandExecutor {
 		try {
 			profileBackwardField = metaBackward.getClass().getDeclaredField("profile");
 		} catch (NoSuchFieldException | SecurityException e) {
-			e.printStackTrace();
 		}
 
 		profileBackwardField.setAccessible(true);
@@ -271,7 +266,6 @@ public class DatapackSearcher implements CommandExecutor {
 		try {
 			profileBackwardField.set(metaBackward, profileBackward);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
 		}
 
 		backward.setItemMeta(metaBackward);
