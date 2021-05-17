@@ -5,10 +5,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.jonaqhan.pmcsearcher.gui.UsCreate;
+import me.jonaqhan.pmcsearcher.gui.Create;
 import me.jonaqhan.pmcsearcher.utils.Chat;
-import me.jonaqhan.pmcsearcher.website.UsData;
-import me.jonaqhan.pmcsearcher.website.UsObtain;
+import me.jonaqhan.pmcsearcher.website.Data;
+import me.jonaqhan.pmcsearcher.website.Obtain;
 
 public class UserSearcher implements CommandExecutor {
 
@@ -29,12 +29,12 @@ public class UserSearcher implements CommandExecutor {
 			return false;
 		}
 
-		UsObtain manager = new UsObtain();
-		UsData data = manager.getData(args[0], p);
+		Obtain manager = new Obtain();
+		Data data = manager.getData(args[0], p);
 		
 		if (data == null) return false;
 
-		UsCreate gui = new UsCreate();
+		Create gui = new Create();
 		p.openInventory(gui.createGUI(p, data));
 
 		return false;

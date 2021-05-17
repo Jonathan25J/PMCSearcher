@@ -27,14 +27,20 @@ import me.jonaqhan.pmcsearcher.utils.Chat;
 
 public class DatapackSearcher implements CommandExecutor {
 
-	public Inventory inv = Bukkit.createInventory(null, 36, Chat.color("#533bedRecent datapacks"));
-
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
 		if (!(sender instanceof Player))
 			return false;
 
+		createPage(sender, 1);
+
+		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void createPage(CommandSender sender, int number) {
+		Inventory inv = Bukkit.createInventory(null, 36, Chat.color("#533bedRecent datapacks #" + number));
 		@SuppressWarnings("resource")
 		WebClient client = new WebClient();
 		client.getOptions().setJavaScriptEnabled(false);
@@ -43,15 +49,22 @@ public class DatapackSearcher implements CommandExecutor {
 		Player p = (Player) sender;
 		HtmlPage page = null;
 		try {
-			page = client.getPage("https://www.planetminecraft.com/data-packs/");
+			page = client.getPage("https://www.planetminecraft.com/data-packs/?p=" + number);
 
 		} catch (Exception e) {
 			p.sendMessage(Chat.color("#42D633[#1C8EDBPMCS#42D633] &ca error has showed up"));
-			return false;
+			return;
 		}
 
-		@SuppressWarnings("unchecked")
-		List<HtmlElement> items = (List<HtmlElement>) page.getByXPath("//*[@id=\"full_screen\"]/div[2]/div[4]/ul/li");
+		List<HtmlElement> items = null;
+
+		if (number == 1) {
+			items = (List<HtmlElement>) page.getByXPath("//*[@id=\"full_screen\"]/div[2]/div[4]/ul/li");
+		}
+
+		if (number >= 2) {
+			items = (List<HtmlElement>) page.getByXPath("//*[@id=\"full_screen\"]/div/div[4]/ul/li");
+		}
 
 		int index = 0;
 
@@ -130,9 +143,14 @@ public class DatapackSearcher implements CommandExecutor {
 
 		}
 
+		ItemStack[] elements = getElements();
+
+		inv.setItem(35, elements[0]);
+		inv.setItem(27, elements[1]);
+
 		p.openInventory(inv);
 
-		return false;
+		return;
 	}
 
 	public ItemStack getItem(List<String> lore, String title) {
@@ -168,7 +186,7 @@ public class DatapackSearcher implements CommandExecutor {
 		textures.add(
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmRhNDgyNjcwYWQ3NDQ2NjA4MTg4M2ZlN2VkZDQ4ZGVjMjdhNjk4YTlhNTJjNGY4NzAzMTBiYTAzNWFjZjY5NiJ9fX0=");
 		textures.add(
-				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGE1NWQwZmYwNDA0MDJlNmE5MjQ2ZDA5YmE5MGUyZTE1YzY4YTE5ZjdkOWE3ZGMwNWVjNGE1NzE3MDc4NGNjZSJ9fX0=");
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkNGFjZThmYTUwN2M0NWIxMWI4OTMzNjJlNDViZWJmNDhjYjIyMDMxNTM1MzJlZmY0MjBhN2Y1Y2Y3NzEwYiJ9fX0=");
 		textures.add(
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2FkMTEzZmRhNjQzNTZmZDYxYzcyOTU0NjdmMDRkMzgwMDc2MjE2MDE1Nzg1MDMxYjQ4YzNmYTE2MTg4OGU4MyJ9fX0=");
 		textures.add(
@@ -201,6 +219,64 @@ public class DatapackSearcher implements CommandExecutor {
 		}
 
 		return skullMeta;
+
+	}
+
+	public ItemStack[] getElements() {
+
+		ItemStack forward = new ItemStack(Material.PLAYER_HEAD);
+
+		SkullMeta metaForward = (SkullMeta) forward.getItemMeta();
+		metaForward.setDisplayName(Chat.color("#15D43BForward"));
+		GameProfile profileForward = new GameProfile(UUID.randomUUID(), null);
+		profileForward.getProperties().put("textures", new Property("textures", new String(
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmEzYjhmNjgxZGFhZDhiZjQzNmNhZThkYTNmZTgxMzFmNjJhMTYyYWI4MWFmNjM5YzNlMDY0NGFhNmFiYWMyZiJ9fX0=")));
+
+		Field profileForwardField = null;
+
+		try {
+			profileForwardField = metaForward.getClass().getDeclaredField("profile");
+		} catch (NoSuchFieldException | SecurityException e) {
+			e.printStackTrace();
+		}
+
+		profileForwardField.setAccessible(true);
+
+		try {
+			profileForwardField.set(metaForward, profileForward);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+		forward.setItemMeta(metaForward);
+
+		ItemStack backward = new ItemStack(Material.PLAYER_HEAD);
+
+		SkullMeta metaBackward = (SkullMeta) backward.getItemMeta();
+		metaBackward.setDisplayName(Chat.color("#15D43BBackward"));
+		GameProfile profileBackward = new GameProfile(UUID.randomUUID(), null);
+		profileBackward.getProperties().put("textures", new Property("textures", new String(
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODY1MmUyYjkzNmNhODAyNmJkMjg2NTFkN2M5ZjI4MTlkMmU5MjM2OTc3MzRkMThkZmRiMTM1NTBmOGZkYWQ1ZiJ9fX0=")));
+
+		Field profileBackwardField = null;
+
+		try {
+			profileBackwardField = metaBackward.getClass().getDeclaredField("profile");
+		} catch (NoSuchFieldException | SecurityException e) {
+			e.printStackTrace();
+		}
+
+		profileBackwardField.setAccessible(true);
+
+		try {
+			profileBackwardField.set(metaBackward, profileBackward);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+		backward.setItemMeta(metaBackward);
+
+		return new ItemStack[] { forward, backward };
 
 	}
 }

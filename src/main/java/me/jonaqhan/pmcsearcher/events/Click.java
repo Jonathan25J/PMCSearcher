@@ -1,7 +1,5 @@
 package me.jonaqhan.pmcsearcher.events;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.util.List;
 
 import org.bukkit.entity.Player;
@@ -14,6 +12,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
+import me.jonaqhan.pmcsearcher.commands.DatapackSearcher;
 import me.jonaqhan.pmcsearcher.utils.Chat;
 
 public class Click implements Listener {
@@ -32,8 +31,9 @@ public class Click implements Listener {
 		e.setCancelled(true);
 	}
 
+	@SuppressWarnings("unchecked")
 	@EventHandler
-	public void onClickDatapack(InventoryClickEvent e) {
+	public void onClickDatapack(InventoryClickEvent e) throws InterruptedException {
 		if (!e.getView().getTitle().contains("Recent datapacks"))
 			return;
 
@@ -45,57 +45,76 @@ public class Click implements Listener {
 
 		String title = e.getCurrentItem().getItemMeta().getDisplayName().substring(14);
 
-		@SuppressWarnings("resource")
-		WebClient client = new WebClient();
-		client.getOptions().setJavaScriptEnabled(false);
-		client.getOptions().setCssEnabled(false);
+		if (!title.contains("Forward") && !title.contains("Backward")) {
 
-		Player p = (Player) e.getWhoClicked();
-		HtmlPage page = null;
-		try {
-			page = client.getPage("https://www.planetminecraft.com/data-packs/");
+			@SuppressWarnings("resource")
+			WebClient client = new WebClient();
+			client.getOptions().setJavaScriptEnabled(false);
+			client.getOptions().setCssEnabled(false);
 
-		} catch (Exception ex) {
-			p.sendMessage(Chat.color("#42D633[#1C8EDBPMCS#42D633] &ca error has showed up"));
-			return;
-		}
+			Player p = (Player) e.getWhoClicked();
+			HtmlPage page = null;
+			try {
+				page = client.getPage(
+						"https://www.planetminecraft.com/data-packs/?p=" + e.getView().getTitle().substring(32));
 
-		@SuppressWarnings("unchecked")
-		List<HtmlElement> items = (List<HtmlElement>) page.getByXPath("//*[@id=\"full_screen\"]/div[2]/div[4]/ul/li");
+			} catch (Exception ex) {
+				p.sendMessage(Chat.color("#42D633[#1C8EDBPMCS#42D633] &ca error has showed up"));
+				return;
+			}
 
-		for (HtmlElement item : items) {
+			List<HtmlElement> items = null;
 
-			HtmlElement header = item.getFirstByXPath("./div[2]/a");
-			System.out.println(title);
+			if (Integer.valueOf(e.getView().getTitle().substring(32)) == 1) {
+				items = (List<HtmlElement>) page.getByXPath("//*[@id=\"full_screen\"]/div[2]/div[4]/ul/li");
+			}
 
-			if (header != null) {
-				System.out.println(header.asText());
+			if (Integer.valueOf(e.getView().getTitle().substring(32)) >= 2) {
+				items = (List<HtmlElement>) page.getByXPath("//*[@id=\"full_screen\"]/div/div[4]/ul/li");
+			}
 
-				if (header.asText().contains(title)) {
+			for (HtmlElement item : items) {
 
-					HtmlAnchor urlElement = (HtmlAnchor) page.getFirstByXPath("./div[2]/a");
-					String url = urlElement.getHrefAttribute();
+				HtmlElement header = item.getFirstByXPath("./div[2]/a");
 
-					System.out.println(url);
+				if (header != null) {
+					if (header.asText().contains(title)) {
 
-					try {
-						openURL(url);
-					} catch (Exception e1) {
+						HtmlAnchor urlElement = (HtmlAnchor) item.getFirstByXPath("./div[2]/a");
+						String url = "https://www.planetminecraft.com" + urlElement.getHrefAttribute();
+
+						p.sendMessage(Chat.color("#42D633[#1C8EDBPMCS#42D633]#3b94ed " + url));
+
 					}
-				}
 
+				}
 			}
 		}
 
+		if (title.contains("Forward")) {
+			DatapackSearcher searcher = new DatapackSearcher();
+			e.getWhoClicked().closeInventory();
+
+			int number = Integer.valueOf(e.getView().getTitle().substring(32)) + 1;
+
+			searcher.createPage(e.getWhoClicked(), number);
+
+		}
+
+		if (title.contains("Backward")) {
+
+			if (Integer.valueOf(e.getView().getTitle().substring(32)) == 1) {
+				e.setCancelled(true);
+				return;
+			}
+			DatapackSearcher searcher = new DatapackSearcher();
+
+			e.getWhoClicked().closeInventory();
+			searcher.createPage(e.getWhoClicked(), Integer.valueOf(e.getView().getTitle().substring(32)) - 1);
+
+		}
+
 		e.setCancelled(true);
-	}
-
-	public static void openURL(String title) throws Exception {
-
-		Desktop d = Desktop.getDesktop();
-
-		d.browse(new URI("https://www.planetminecraft.com/data-pack/" + title));
-
 	}
 
 }
