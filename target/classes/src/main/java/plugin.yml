@@ -8,3 +8,5 @@ api-version: 1.16
 commands:
   pmu:
     description: /pmu <user> get userstats from a PMC user
+  pmd:
+    description: see the newest datapacks
